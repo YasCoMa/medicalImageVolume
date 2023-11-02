@@ -1,0 +1,19 @@
+version: '3'
+        
+services:
+  web:
+    container_name: webapp_dev
+    env_file:
+      -  .env
+    build:
+      context: .
+      target: development
+      dockerfile: ./Dockerfile
+    command: npm run dev
+    ports:
+      - 127.0.0.1:3002:3002
+      - 127.0.0.1:24678:24678
+    volumes:
+      - ./webapp:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
