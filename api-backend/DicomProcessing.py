@@ -66,6 +66,8 @@ class DicomProcessing:
         ------
         filteredData : Numpy Array
             2D Array with the filtered array of pixels contrasting the pixel locations above the threshold
+        pixelsAboveCutoff : int
+            Number of pixels above the given threshold
         """
         
         originalShape = normalizedData.shape
