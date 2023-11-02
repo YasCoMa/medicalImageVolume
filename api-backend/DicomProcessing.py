@@ -128,6 +128,8 @@ class DicomProcessing:
 
         Returns
         ------
+        pixelsAboveCutoff : int
+            Number of pixels above the given threshold
         volume : float
             Volume value
         """
