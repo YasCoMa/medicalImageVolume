@@ -13,6 +13,7 @@
         type="file"
         class="overlayed"
         :multiple="multiple"
+        :value="temp"
         accept=".dcm"
         @change="handleUpload"
       />
@@ -25,7 +26,7 @@
         <div class="text-center">
           <!-- Let's use a slot here to make our component a little more flexible (maybe the end developer would live to add an icon in there, etc) -->
           <slot>
-            <strong>Upload File</strong>
+            <strong>Upload File(s)</strong>
           </slot>
 
           <!-- 
@@ -44,19 +45,48 @@
       </span>
     </label>
   
-    <Button @click="calcVolume();"
-      class="mx-2"
-      v-if="files.length > 0"
-    >
-      Calculate Volume
-    </Button>
+    <div class="flex justify-start " v-if="files.length > 0" >
+        <Button 
+          @click="calcVolume();"
+          class="mx-2"
+          style="width: "
+          :is-loading="isLoading"
+        >
+          Calculate Volume
+        </Button>
+        
+        <Button 
+          @click="results = []; temp = []; files = [];"
+          class="mx-2"
+          style="width: "
+          :is-loading="isLoading"
+          v-if="results.length > 0"
+        >
+          Clear results
+        </Button>
+    </div>
+    
     <p v-else> <strong>No chosen files yet</strong> </p>
   </div>
   
-  <div class="grid grid-cols-1 gap-4 " v-if="volume!=0" >
-    <p> <strong>Pixels above threshold:</strong> <span> {{ pixelsAbove }} </span> </p>
-    <p> <strong>Volume:</strong> <span> {{ volume }}mm³ </span> </p>
+  <div class="grid grid-cols-4 lg:grid-cols-6 gap-4 mt-4 " v-if="results.length!=0" >
+    <Card v-for="d in results" :type="d.error ? 'error' : 'success'" >
+        <template #title >
+            <span v-if="! d.error" >{{ d.data.name }}</span>
+            <span v-else >{{ d.name }}</span>
+          </template>
+
+          <template #body >
+            <span v-if="! d.error" >
+                <p v-if="! d.error" > <strong>Pixels above threshold:</strong> <span> {{ d.data.pixelsAboveCutoff }} </span> </p>
+                <p v-if="! d.error" > <strong>Volume:</strong> <span> {{ d.data.volume }}mm³ </span> </p>
+            </span>
+            
+            <span v-else> Incorrect or invalid file </span>
+          </template>
+    </Card>
   </div>
+  
 </template>
 
 <style scoped>
@@ -74,6 +104,9 @@ const files = ref([]);
 let volume = ref(0);
 let pixelsAbove = ref(0);
 let color = "cyan";
+let results = ref([]);
+let temp = ref([]);
+let isLoading = ref(false);
 
 const props = defineProps<{
   multiple: boolean;
@@ -82,29 +115,40 @@ const props = defineProps<{
 const uploadInfo = computed(() => {
   return files.value.length === 1
     ? files.value[0].name
-    : `${files.value.length} files selected`
+    : `${files.value.length} files selected: (${ files.value.map( (im) => im.name ).join(', ') })`
 })
 
 const handleUpload = (e) => {
-  files.value = Array.from(e.target.files) || []
-  
+  files.value = Array.from(e.target.files).filter( f => f.name.split(".").slice(-1)[0].toLowerCase().includes("dcm") ) || []
+  if( Array.from(e.target.files).length > 0 && files.value.length == 0){
+    alert('No valid dcm images were uploaded')
+  }
 }
 
 const calcVolume = () => {
-  volume.value = 0;    
+  isLoading.value = true;
+  results.value = [];    
+  
   if(files.value.length > 0){
-    let formData = new FormData();
-    formData.append('imageFile', files.value[0]);
-            
-    rpmedimg.calculateVolume(formData).then( (response) => {
-      console.log(response.data.value)
-      volume.value = response.data.value.volume;
-      pixelsAbove.value = response.data.value.pixelsAboveCutoff;
-    })
-    .catch((err) => {
-      alert(err?.response?.data?.detail)
+    Promise.all( files.value.map( async (im) => {
+        let formData = new FormData();
+        formData.append('imageFile', im );
+        
+        let resp = { name: im.name, error: null };
+        try{
+            resp = await rpmedimg.calculateVolume(formData);
+        }
+        catch(e){
+            console.log(e)
+            resp.error = e;
+        }
+        return resp;
+    }) ).then( (res) => {
+        results.value = res;
+        temp.value = [];
     })
     .finally( () => {
+        isLoading.value = false;
     });
   }
   else{

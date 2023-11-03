@@ -2,6 +2,7 @@
 declare module 'vue' {
   export interface GlobalComponents {
     'Button': typeof import("../components/Button.vue")['default']
+    'Card': typeof import("../components/Card.vue")['default']
     'DragDropUpload': typeof import("../components/DragDropUpload.vue")['default']
     'Loader': typeof import("../components/Loader.vue")['default']
     'Text': typeof import("../components/Text.vue")['default']
@@ -27,6 +28,7 @@ declare module 'vue' {
     'Html': typeof import("../node_modules/nuxt/dist/head/runtime/components")['Html']
     'Body': typeof import("../node_modules/nuxt/dist/head/runtime/components")['Body']
     'LazyButton': typeof import("../components/Button.vue")['default']
+    'LazyCard': typeof import("../components/Card.vue")['default']
     'LazyDragDropUpload': typeof import("../components/DragDropUpload.vue")['default']
     'LazyLoader': typeof import("../components/Loader.vue")['default']
     'LazyText': typeof import("../components/Text.vue")['default']
@@ -55,6 +57,7 @@ declare module 'vue' {
 }
 
 export const Button: typeof import("../components/Button.vue")['default']
+export const Card: typeof import("../components/Card.vue")['default']
 export const DragDropUpload: typeof import("../components/DragDropUpload.vue")['default']
 export const Loader: typeof import("../components/Loader.vue")['default']
 export const Text: typeof import("../components/Text.vue")['default']
@@ -80,6 +83,7 @@ export const Head: typeof import("../node_modules/nuxt/dist/head/runtime/compone
 export const Html: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Html']
 export const Body: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Body']
 export const LazyButton: typeof import("../components/Button.vue")['default']
+export const LazyCard: typeof import("../components/Card.vue")['default']
 export const LazyDragDropUpload: typeof import("../components/DragDropUpload.vue")['default']
 export const LazyLoader: typeof import("../components/Loader.vue")['default']
 export const LazyText: typeof import("../components/Text.vue")['default']
